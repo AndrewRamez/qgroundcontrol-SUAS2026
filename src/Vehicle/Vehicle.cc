@@ -665,6 +665,7 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
         break;
     case MAVLINK_MSG_ID_STATUSTEXT:
         m_statusTextHandler->mavlinkMessageReceived(message);
+        _handleFsmStateStatusText(message);
         break;
     case MAVLINK_MSG_ID_ORBIT_EXECUTION_STATUS:
         _handleOrbitExecutionStatus(message);
@@ -2915,6 +2916,30 @@ void Vehicle::_handleFenceStatus(const mavlink_message_t& message)
         lastUpdate = now;
     }
 }
+
+void Vehicle::_handleFsmStateStatusText(const mavlink_message_t& message)
+{
+    mavlink_statustext_t statusText;
+    mavlink_msg_statustext_decode(&message, &statusText);
+
+    char buffer[MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN + 1];
+    memcpy(buffer, statusText.text, MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN);
+    buffer[MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN] = '\0';
+    QString text(buffer);
+
+    static const QString prefix = QStringLiteral("FSM_STATE:");
+    if (!text.startsWith(prefix)) {
+        return;
+    }
+
+    QString newState = text.mid(prefix.length()).trimmed();
+    if (newState.isEmpty() || newState == _fsmState) {
+        return;
+    }
+
+    _fsmState = newState;
+    emit fsmStateChanged();
+} 
 
 void Vehicle::updateFlightDistance(double distance)
 {
