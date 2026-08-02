@@ -2926,7 +2926,6 @@ void Vehicle::_handleFsmStateStatusText(const mavlink_message_t& message)
     memcpy(buffer, statusText.text, MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN);
     buffer[MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN] = '\0';
     QString text(buffer);
-    qWarning() << "[FSM DEBUG] Received STATUSTEXT:" << text;
     static const QString prefix = QStringLiteral("FSM_STATE:");
     if (!text.startsWith(prefix)) {
         return;
