@@ -204,4 +204,52 @@ Item {
         FlyViewPreFlightChecklistPopup {
         }
     }
+    //------------------------------------------------------------------
+    // SkyXperts SUAS - FSM State Display Widget
+    //------------------------------------------------------------------
+    Rectangle {
+        id:                 fsmStateWidget
+        anchors.top:        parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.topMargin:  ScreenTools.defaultFontPixelHeight * 3
+        width:              fsmColumn.width + (ScreenTools.defaultFontPixelWidth * 3)
+        height:             fsmColumn.height + (ScreenTools.defaultFontPixelHeight)
+        radius:             ScreenTools.defaultFontPixelWidth * 0.5
+        color:              "#CC000000"
+        border.color:       _fsmBorderColor
+        border.width:       2
+        visible:            _activeVehicle
+
+        property string _fsmState:      _activeVehicle ? _activeVehicle.fsmState : "UNKNOWN"
+        property color  _fsmBorderColor: {
+            if (_fsmState.indexOf("EMERGENCY") !== -1 || _fsmState.indexOf("ABORT") !== -1 || _fsmState.indexOf("TERMINATION") !== -1)
+                return "#FF4444"
+            if (_fsmState.indexOf("TAKEOFF") !== -1 || _fsmState.indexOf("LAND") !== -1 || _fsmState.indexOf("RETURN") !== -1)
+                return "#FFAA00"
+            if (_fsmState === "UNKNOWN" || _fsmState.indexOf("INIT") !== -1)
+                return "#888888"
+            return "#44DD44"
+        }
+
+        Column {
+            id:                 fsmColumn
+            anchors.centerIn:   parent
+            spacing:            ScreenTools.defaultFontPixelHeight * 0.2
+
+            QGCLabel {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text:                     qsTr("MISSION STATE")
+                font.pointSize:           ScreenTools.smallFontPointSize
+                color:                    "#AAAAAA"
+            }
+
+            QGCLabel {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text:                     fsmStateWidget._fsmState
+                font.pointSize:           ScreenTools.mediumFontPointSize
+                font.bold:                true
+                color:                    fsmStateWidget._fsmBorderColor
+            }
+        }
+    }
 }
